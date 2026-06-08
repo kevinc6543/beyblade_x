@@ -528,60 +528,45 @@
                     syncWithGAS(gasUrlInput.value);
                 };
 
-                // --- 資料處理與計算屬性 ---
-               const processedBeyblades = computed(() => {
-    return rawBeyblades.value.map(item => {
-        // 【除錯用】按下 F12 查看 Console，如果這裡印出的 item 物件裡沒有 "軸心類型" 這個 key，就是問題所在
-        // console.log("當前項目資料:", item); 
-        
-        return {
-            version: item["港/美版"] || "港版", // 對應您截圖的 A 欄標題
-            name: `${item["陀螺"] || ""}-${item["上蓋"] || ""}`,
-            blade: item["上蓋"] || "未知",
-            ratchet: item["固鎖"] || "未知",
-            ratchetTier: item["固鎖 Tier"] || "A", // 對應截圖 E 欄標題
-            bit: item["軸心"] || "未知",
-            bitTier: item["軸心 Tier"] || "A", // 對應截圖 G 欄標題
-            bitType: item["軸心類型"] || "無類型", // 對應截圖 H 欄標題
-        };
-    });
-});
-                
-                const uniqueBlades = computed(() => {
-    const map = {};
-    processedBeyblades.value.forEach(item => {
-        const bladeName = item.blade;
-        // 取得陀螺名稱 (假設這是 "BX-01 Dran Sword" 這類格式)
-        const beyName = item.name.split('-')[0]; 
-        
-        if (bladeName && bladeName !== "N/A" && bladeName !== "未知" && bladeName !== "") {
-            if (!map[bladeName]) {
-                map[bladeName] = { 
-                    name: bladeName, 
-                    source: beyName, // 儲存陀螺名稱前綴
-                    count: 0, 
-                    tier: "N/A" 
-                };
-            }
-            map[bladeName].count++;
-        }
-    });
-    return Object.values(map).sort((a, b) => b.count - a.count);
-});
+            // 1. 資料預處理
+                const processedBeyblades = computed(() => {
+                    return rawBeyblades.value.map(item => ({
+                        version: item["版本"] || "港版",
+                        name: `${item["陀螺"] || ""}-${item["上蓋"] || ""}`,
+                        blade: item["上蓋"] || "未知",
+                        ratchet: item["固鎖"] || "未知",
+                        ratchetTier: item["固鎖Tier"] || item["固鎖 Tier"] || "A",
+                        bit: item["軸心"] || "未知",
+                        bitTier: item["軸心Tier"] || item["軸心 Tier"] || "A",
+                        bitType: item["軸心類型"] || "無類型",
+                        type: item["類型"] || "攻擊"
+                    }));
+                });
 
-// 這是確保系統運作的關鍵區塊，請複製這整段
-                const uniqueBits = computed(() => {
+                // 2. 上蓋 (Blade) 去重
+                const uniqueBlades = computed(() => {
                     const map = {};
                     processedBeyblades.value.forEach(item => {
-                        const name = item.bit;
+                        const bladeName = item.blade;
+                        const beyName = item.name.split('-')[0];
+                        if (bladeName && bladeName !== "N/A" && bladeName !== "未知" && bladeName !== "") {
+                            if (!map[bladeName]) {
+                                map[bladeName] = { name: bladeName, source: beyName, count: 0, tier: "N/A" };
+                            }
+                            map[bladeName].count++;
+                        }
+                    });
+                    return Object.values(map).sort((a, b) => b.count - a.count);
+                });
+
+                // 3. 固鎖 (Ratchet) 去重
+                const uniqueRatchets = computed(() => {
+                    const map = {};
+                    processedBeyblades.value.forEach(item => {
+                        const name = item.ratchet;
                         if (name && name !== "N/A" && name !== "未知" && name !== "") {
                             if (!map[name]) {
-                                map[name] = { 
-                                    name: name, 
-                                    count: 0, 
-                                    tier: item.bitTier, 
-                                    type: item.bitType 
-                                };
+                                map[name] = { name: name, count: 0, tier: item.ratchetTier };
                             }
                             map[name].count++;
                         }
@@ -589,17 +574,14 @@
                     return Object.values(map).sort((a, b) => b.count - a.count);
                 });
 
-                const uniqueRatchets = computed(() => {
+                // 4. 軸心 (Bit) 去重
+                const uniqueBits = computed(() => {
                     const map = {};
                     processedBeyblades.value.forEach(item => {
-                        const name = item.ratchet;
+                        const name = item.bit;
                         if (name && name !== "N/A" && name !== "未知" && name !== "") {
                             if (!map[name]) {
-                                map[name] = { 
-                                    name: name, 
-                                    count: 0, 
-                                    tier: item.ratchetTier 
-                                };
+                                map[name] = { name: name, count: 0, tier: item.bitTier, type: item.bitType };
                             }
                             map[name].count++;
                         }
