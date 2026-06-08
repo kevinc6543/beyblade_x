@@ -529,18 +529,20 @@
                 };
 
             // 1. 資料預處理
-                const processedBeyblades = computed(() => {
-                    return rawBeyblades.value.map(item => ({
-                        version: item["版本"] || "港版",
-                        name: `${item["陀螺"] || ""}-${item["上蓋"] || ""}`,
-                        blade: item["上蓋"] || "未知",
-                        ratchet: item["固鎖"] || "未知",
-                        ratchetTier: item["固鎖Tier"] || item["固鎖 Tier"] || "A",
-                        bit: item["軸心"] || "未知",
-                        bitTier: item["軸心Tier"] || item["軸心 Tier"] || "A",
-                        bitType: item["軸心類型"] || "無類型",
-                        type: item["類型"] || "攻擊"
-                    }));
+            const processedBeyblades = computed(() => {
+                    return rawBeyblades.value.map(item => {
+                        return {
+                            version: item["港/美版"] || "港版",
+                            name: `${item["陀螺"] || ""}-${item["上蓋"] || ""}`,
+                            blade: item["上蓋"] || "未知",
+                            ratchet: item["固鎖"] || "未知",
+                            ratchetTier: item["固鎖 Tier"] || "A",
+                            bit: item["軸心"] || "未知",
+                            bitTier: item["軸心 Tier"] || "A",
+                            bitType: item["軸心類型"] || "無類型",
+                            type: item["類型"] || "攻擊" // 補回這行，這是篩選器用的
+                        };
+                    });
                 });
 
                 // 2. 上蓋 (Blade) 去重
@@ -589,10 +591,11 @@
                     return Object.values(map).sort((a, b) => b.count - a.count);
                 });
 
-                const filteredBeyblades = computed(() => {
+      const filteredBeyblades = computed(() => {
                     return processedBeyblades.value.filter(bey => {
                         const matchSearch = Object.values(bey).some(val => String(val).toLowerCase().includes(searchQuery.value.toLowerCase()));
-                        const matchType = filterType.value === 'all' || bey.bitType === filterType.value;
+                        // 這裡使用 bey.type 進行篩選，對應下拉選單
+                        const matchType = filterType.value === 'all' || bey.type === filterType.value;
                         return matchSearch && matchType;
                     });
                 });
