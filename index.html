@@ -218,7 +218,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <h2 class="text-xl font-bold flex items-center space-x-2">
                             <span class="h-4 w-1 bg-neonBlue rounded"></span>
-                            <span>我的原裝陀螺清單</span>
+                            <span>我的陀螺清單</span>
                         </h2>
                         <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                             <div class="relative flex-grow sm:flex-grow-0 sm:w-64">
@@ -283,7 +283,7 @@
                 <div v-if="currentTab === 'inventory'" class="space-y-6">
                     <h2 class="text-xl font-bold flex items-center space-x-2">
                         <span class="h-4 w-1 bg-neonPurple rounded"></span>
-                        <span>我的零件倉庫 (去重解析)</span>
+                        <span>我的零件倉庫 </span>
                     </h2>
                     <div class="flex border-b border-slate-800 space-x-4">
                         <button @click="inventoryTab = 'blade'" :class="['pb-2 text-sm font-semibold transition-all', inventoryTab === 'blade' ? 'text-neonBlue border-b-2 border-neonBlue' : 'text-slate-400 hover:text-slate-200']">上蓋 ({{ uniqueBlades.length }})</button>
@@ -315,18 +315,20 @@
                     </div>
 
                     <div v-if="inventoryTab === 'bit'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div v-for="part in uniqueBits" :key="part.name" class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 flex justify-between items-center">
-                            <div>
-                                <div class="flex items-center space-x-2">
-                                    <h3 class="text-sm font-bold text-white">{{ part.name }}</h3>
-                                    <span v-if="part.tier" class="text-[9px] px-1.5 py-0.2 rounded font-black" :class="getTierClass(part.tier)">Tier {{ part.tier }}</span>
-                                </div>
-                                <p class="text-[11px] text-slate-500 mb-0">出現 {{ part.count }} 次</p>
-                            </div>
-                            <span class="text-xs px-2.5 py-1 bg-slate-800 rounded-lg text-slate-300 font-mono">庫存 x{{ part.count }}</span>
-                        </div>
-                    </div>
-                </div>
+    <div v-for="part in uniqueBits" :key="part.name" class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 flex justify-between items-center">
+        <div>
+            <div class="flex items-center space-x-2 mb-1">
+                <h3 class="text-sm font-bold text-white">{{ part.name }}</h3>
+                <span v-if="part.tier" class="text-[9px] px-1.5 py-0.2 rounded font-black" :class="getTierClass(part.tier)">Tier {{ part.tier }}</span>
+                <span class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                    {{ part.type }}
+                </span>
+            </div>
+            <p class="text-[11px] text-slate-500 mb-0">出現 {{ part.count }} 次</p>
+        </div>
+        <span class="text-xs px-2.5 py-1 bg-slate-800 rounded-lg text-slate-300 font-mono">庫存 x{{ part.count }}</span>
+    </div>
+</div>
 
                 <div v-if="currentTab === 'settings'" class="space-y-6">
                     <h2 class="text-xl font-bold flex items-center space-x-2">
@@ -561,18 +563,17 @@
                     return Object.values(map).sort((a, b) => b.count - a.count);
                 });
 
-                const uniqueBits = computed(() => {
+const uniqueBits = computed(() => {
     const map = {};
     processedBeyblades.value.forEach(item => {
         const name = item.bit;
-        // 過濾 N/A
         if (name && name !== "N/A" && name !== "") {
             if (!map[name]) {
                 map[name] = { 
                     name: name, 
                     count: 0, 
                     tier: item.bitTier, 
-                    type: item.bitType // 改為使用軸心專屬類型
+                    type: item.bitType // 這裡存入類型，供 HTML 顯示
                 };
             }
             map[name].count++;
