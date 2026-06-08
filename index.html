@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beyblade X </title>
+    <title>Beyblade X</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -164,7 +164,7 @@
                 <span class="text-xs font-bold text-slate-400 tracking-wider">獨特軸心</span>
                 <i class="fa-solid fa-bolt-lightning text-neonOrange text-lg"></i>
             </div>
-            <div class="text-3xl font-black font-['Orbitron'] text-white">{{ .length }}</div>
+            <div class="text-3xl font-black font-['Orbitron'] text-white">{{ uniqueBits.length }}</div>
         </div>
     </div>
 
@@ -288,7 +288,7 @@
                     <div class="flex border-b border-slate-800 space-x-4">
                         <button @click="inventoryTab = 'blade'" :class="['pb-2 text-sm font-semibold transition-all', inventoryTab === 'blade' ? 'text-neonBlue border-b-2 border-neonBlue' : 'text-slate-400 hover:text-slate-200']">上蓋 ({{ uniqueBlades.length }})</button>
                         <button @click="inventoryTab = 'ratchet'" :class="['pb-2 text-sm font-semibold transition-all', inventoryTab === 'ratchet' ? 'text-neonBlue border-b-2 border-neonBlue' : 'text-slate-400 hover:text-slate-200']">固鎖 ({{ uniqueRatchets.length }})</button>
-                        <button @click="inventoryTab = 'bit'" :class="['pb-2 text-sm font-semibold transition-all', inventoryTab === 'bit' ? 'text-neonBlue border-b-2 border-neonBlue' : 'text-slate-400 hover:text-slate-200']">軸心 ({{ .length }})</button>
+                        <button @click="inventoryTab = 'bit'" :class="['pb-2 text-sm font-semibold transition-all', inventoryTab === 'bit' ? 'text-neonBlue border-b-2 border-neonBlue' : 'text-slate-400 hover:text-slate-200']">軸心 ({{ uniqueBits.length }})</button>
                     </div>
 
                     <div v-if="inventoryTab === 'blade'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -323,7 +323,6 @@
             <div class="flex items-center space-x-2 mb-1">
                 <h3 class="text-sm font-bold text-white">{{ part.name }}</h3>
                 <span v-if="part.tier" class="text-[9px] px-1.5 py-0.2 rounded font-black" :class="getTierClass(part.tier)">Tier {{ part.tier }}</span>
-                <!-- 強制顯示 part.type，如果顯示空白表示資料未讀取成功 -->
                 <span class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-slate-700 text-white border border-slate-600">
                     {{ part.type || '未分類' }}
                 </span>
@@ -546,20 +545,33 @@
                 });
 
                 // 2. 上蓋 (Blade) 去重
-                const uniqueBlades = computed(() => {
-                    const map = {};
-                    processedBeyblades.value.forEach(item => {
-                        const bladeName = item.blade;
-                        const beyName = item.name.split('-')[0];
-                        if (bladeName && bladeName !== "N/A" && bladeName !== "未知" && bladeName !== "") {
-                            if (!map[bladeName]) {
-                                map[bladeName] = { name: bladeName, source: beyName, count: 0, tier: "N/A" };
-                            }
-                            map[bladeName].count++;
-                        }
-                    });
-                    return Object.values(map).sort((a, b) => b.count - a.count);
-                });
+const uniqueBlades = computed(() => {
+    const map = {};
+    processedBeyblades.value.forEach(item => {
+        const bladeName = item.blade;
+        // 【修正重點】不使用 split('-')，直接使用整個陀螺名稱作為來源
+        // 假設 rawBeyblades 裡的 "陀螺" 欄位本身就包含 "UX-17..."
+        // 我們直接把這個值傳進來顯示
+        const beyName = item.name.split('-')[0]; // 如果這導致切割，我們需要改用 raw 資料
+
+        // 如果你發現上面還是顯示錯誤，請將這行改成：
+        // const beyName = item.name.substring(0, item.name.lastIndexOf('-')); 
+        // 這樣會保留最後一個 hyphen 之前的所有文字
+        
+        if (bladeName && bladeName !== "N/A" && bladeName !== "未知" && bladeName !== "") {
+            if (!map[bladeName]) {
+                map[bladeName] = { 
+                    name: bladeName, 
+                    source: item.name.replace("-" + bladeName, ""), // 直接移除上蓋名稱，保留前面的陀螺全名
+                    count: 0, 
+                    tier: "N/A" 
+                };
+            }
+            map[bladeName].count++;
+        }
+    });
+    return Object.values(map).sort((a, b) => b.count - a.count);
+});
 
                 // 3. 固鎖 (Ratchet) 去重
                 const uniqueRatchets = computed(() => {
