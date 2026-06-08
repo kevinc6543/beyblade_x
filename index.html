@@ -292,14 +292,17 @@
                     </div>
 
                     <div v-if="inventoryTab === 'blade'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div v-for="part in uniqueBlades" :key="part.name" class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 flex justify-between items-center">
-                            <div>
-                                <h3 class="text-sm font-bold text-white mb-1">{{ part.name }}</h3>
-                                <p class="text-[11px] text-slate-500 mb-0">於原裝陀螺中出現了 {{ part.count }} 次</p>
-                            </div>
-                            <span class="text-xs px-2.5 py-1 bg-slate-800 rounded-lg text-slate-300 font-mono">庫存 x{{ part.count }}</span>
-                        </div>
-                    </div>
+    <div v-for="part in uniqueBlades" :key="part.name" class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 flex justify-between items-center">
+        <div>
+            <div class="text-[10px] text-neonBlue font-bold uppercase tracking-wider mb-0.5">
+                {{ part.source }}
+            </div>
+            <h3 class="text-sm font-bold text-white">{{ part.name }}</h3>
+            <p class="text-[11px] text-slate-500 mb-0 mt-1">庫存數量: {{ part.count }}</p>
+        </div>
+        <span class="text-xs px-2.5 py-1 bg-slate-800 rounded-lg text-slate-300 font-mono">x{{ part.count }}</span>
+    </div>
+</div>
 
                     <div v-if="inventoryTab === 'ratchet'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div v-for="part in uniqueRatchets" :key="part.name" class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 flex justify-between items-center">
@@ -545,28 +548,26 @@
 });
 
                 const uniqueBlades = computed(() => {
-                    const map = {};
-                    processedBeyblades.value.forEach(item => {
-                        const name = item.blade;
-                        if (name && name !== "N/A" && name !== "未知" && name !== "") {
-                            if (!map[name]) map[name] = { name: name, count: 0, tier: "N/A" };
-                            map[name].count++;
-                        }
-                    });
-                    return Object.values(map).sort((a, b) => b.count - a.count);
-                });
-
-                const uniqueRatchets = computed(() => {
-                    const map = {};
-                    processedBeyblades.value.forEach(item => {
-                        const name = item.ratchet;
-                        if (name && name !== "N/A" && name !== "未知" && name !== "") {
-                            if (!map[name]) map[name] = { name: name, count: 0, tier: item.ratchetTier };
-                            map[name].count++;
-                        }
-                    });
-                    return Object.values(map).sort((a, b) => b.count - a.count);
-                });
+    const map = {};
+    processedBeyblades.value.forEach(item => {
+        const bladeName = item.blade;
+        // 取得陀螺名稱 (假設這是 "BX-01 Dran Sword" 這類格式)
+        const beyName = item.name.split('-')[0]; 
+        
+        if (bladeName && bladeName !== "N/A" && bladeName !== "未知" && bladeName !== "") {
+            if (!map[bladeName]) {
+                map[bladeName] = { 
+                    name: bladeName, 
+                    source: beyName, // 儲存陀螺名稱前綴
+                    count: 0, 
+                    tier: "N/A" 
+                };
+            }
+            map[bladeName].count++;
+        }
+    });
+    return Object.values(map).sort((a, b) => b.count - a.count);
+});
 
 const uniqueBits = computed(() => {
     const map = {};
