@@ -569,17 +569,17 @@
     return Object.values(map).sort((a, b) => b.count - a.count);
 });
 
-const uniqueBits = computed(() => {
+const uniqueRatchets = computed(() => {
     const map = {};
     processedBeyblades.value.forEach(item => {
-        const name = item.bit;
-        if (name && name !== "N/A" && name !== "") {
+        const name = item.ratchet;
+        // 過濾無效資料
+        if (name && name !== "N/A" && name !== "未知" && name !== "") {
             if (!map[name]) {
                 map[name] = { 
                     name: name, 
                     count: 0, 
-                    tier: item.bitTier, 
-                    type: item.bitType // 確保此處傳遞的是處理過的 bitType
+                    tier: item.ratchetTier 
                 };
             }
             map[name].count++;
