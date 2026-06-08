@@ -314,14 +314,15 @@
                         </div>
                     </div>
 
-                    <div v-if="inventoryTab === 'bit'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+<div v-if="inventoryTab === 'bit'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
     <div v-for="part in uniqueBits" :key="part.name" class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 flex justify-between items-center">
         <div>
             <div class="flex items-center space-x-2 mb-1">
                 <h3 class="text-sm font-bold text-white">{{ part.name }}</h3>
                 <span v-if="part.tier" class="text-[9px] px-1.5 py-0.2 rounded font-black" :class="getTierClass(part.tier)">Tier {{ part.tier }}</span>
-                <span class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-slate-800 text-slate-300 border border-slate-700">
-                    {{ part.type }}
+                <!-- 強制顯示 part.type，如果顯示空白表示資料未讀取成功 -->
+                <span class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-slate-700 text-white border border-slate-600">
+                    {{ part.type || '未分類' }}
                 </span>
             </div>
             <p class="text-[11px] text-slate-500 mb-0">出現 {{ part.count }} 次</p>
@@ -329,7 +330,6 @@
         <span class="text-xs px-2.5 py-1 bg-slate-800 rounded-lg text-slate-300 font-mono">庫存 x{{ part.count }}</span>
     </div>
 </div>
-
                 <div v-if="currentTab === 'settings'" class="space-y-6">
                     <h2 class="text-xl font-bold flex items-center space-x-2">
                         <span class="h-4 w-1 bg-slate-600 rounded"></span>
@@ -526,18 +526,23 @@
                 };
 
                 // --- 資料處理與計算屬性 ---
-                const processedBeyblades = computed(() => {
-                    return rawBeyblades.value.map(item => ({
-                        version: item["港/美版"] || "港版",
-                        name: `${item["陀螺"] || ""}-${item["上蓋"] || ""}`,
-                        blade: item["上蓋"] || "未知",
-                        ratchet: item["固鎖"] || "未知",
-                        ratchetTier: item["固鎖Tier"] || item["固鎖 Tier"] || "A",
-                        bit: item["軸心"] || "未知",
-                        bitTier: item["軸心Tier"] || item["軸心 Tier"] || "A",
-                        type: item["軸心類型"] || "攻擊"
-                    }));
-                });
+               const processedBeyblades = computed(() => {
+    return rawBeyblades.value.map(item => {
+        // 【除錯用】按下 F12 查看 Console，如果這裡印出的 item 物件裡沒有 "軸心類型" 這個 key，就是問題所在
+        // console.log("當前項目資料:", item); 
+        
+        return {
+            version: item["港/美版"] || "港版", // 對應您截圖的 A 欄標題
+            name: `${item["陀螺"] || ""}-${item["上蓋"] || ""}`,
+            blade: item["上蓋"] || "未知",
+            ratchet: item["固鎖"] || "未知",
+            ratchetTier: item["固鎖 Tier"] || "A", // 對應截圖 E 欄標題
+            bit: item["軸心"] || "未知",
+            bitTier: item["軸心 Tier"] || "A", // 對應截圖 G 欄標題
+            bitType: item["軸心類型"] || "無類型", // 對應截圖 H 欄標題
+        };
+    });
+});
 
                 const uniqueBlades = computed(() => {
                     const map = {};
@@ -573,7 +578,7 @@ const uniqueBits = computed(() => {
                     name: name, 
                     count: 0, 
                     tier: item.bitTier, 
-                    type: item.bitType // 這裡存入類型，供 HTML 顯示
+                    type: item.bitType // 確保此處傳遞的是處理過的 bitType
                 };
             }
             map[name].count++;
@@ -585,7 +590,7 @@ const uniqueBits = computed(() => {
                 const filteredBeyblades = computed(() => {
                     return processedBeyblades.value.filter(bey => {
                         const matchSearch = Object.values(bey).some(val => String(val).toLowerCase().includes(searchQuery.value.toLowerCase()));
-                        const matchType = filterType.value === 'all' || bey.type === filterType.value;
+                        const matchType = filterType.value === 'all' || bey.bitType === filterType.value;
                         return matchSearch && matchType;
                     });
                 });
