@@ -227,13 +227,13 @@
                                 </span>
                                 <input v-model="searchQuery" type="text" placeholder="搜尋陀螺/零件名稱..." class="w-full bg-slate-900 border border-slate-800 rounded-lg pl-9 pr-4 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-neonBlue transition-all">
                             </div>
-                            <select v-model="filterType" class="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-slate-300 focus:outline-none focus:border-neonBlue transition-all">
-                                <option value="all">所有陀螺類型</option>
-                                <option value="攻擊">攻擊型 (Attack)</option>
-                                <option value="防守">防守型 (Defense)</option>
-                                <option value="持久">持久型 (Stamina)</option>
-                                <option value="平衡">平衡型 (Balance)</option>
-                            </select>
+                           // <select v-model="filterType" class="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-slate-300 focus:outline-none focus:border-neonBlue transition-all">
+                             //   <option value="all">所有陀螺類型</option>
+                               // <option value="攻擊">攻擊型 (Attack)</option>
+                                //<option value="防守">防守型 (Defense)</option>
+                               // <option value="持久">持久型 (Stamina)</option>
+                                //<option value="平衡">平衡型 (Balance)</option>
+                           // </select>
                         </div>
                     </div>
 
@@ -399,7 +399,6 @@
                 const savedGasUrl = ref(defaultGasUrl);
 
                 const searchQuery = ref('');
-                const filterType = ref('all');
 
                 // 離線備用 Mock Data
                 const mockBeyblades = [
@@ -603,14 +602,15 @@ const uniqueBlades = computed(() => {
                     return Object.values(map).sort((a, b) => b.count - a.count);
                 });
 
-      const filteredBeyblades = computed(() => {
-                    return processedBeyblades.value.filter(bey => {
-                        const matchSearch = Object.values(bey).some(val => String(val).toLowerCase().includes(searchQuery.value.toLowerCase()));
-                        // 這裡使用 bey.type 進行篩選，對應下拉選單
-                        const matchType = filterType.value === 'all' || bey.type === filterType.value;
-                        return matchSearch && matchType;
-                    });
-                });
+   // 修改前：包含 matchType
+// 修改後：只保留搜尋關鍵字邏輯
+const filteredBeyblades = computed(() => {
+    return processedBeyblades.value.filter(bey => {
+        return Object.values(bey).some(val => 
+            String(val).toLowerCase().includes(searchQuery.value.toLowerCase())
+        );
+    });
+});
 
                 const getTierClass = (tier) => {
                     if (tier === 'X') return 'bg-amber-950/80 text-amber-300 border border-amber-500 font-bold animate-pulse';
