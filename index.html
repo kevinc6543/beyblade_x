@@ -249,9 +249,6 @@
                                           }">
                                         {{ bey.version }}
                                     </span>
-                                    <span class="text-xs px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-300">
-                                        {{ bey.type }}型
-                                    </span>
                                 </div>
                                 <h3 class="text-base font-bold text-white mb-4 tracking-wide">{{ bey.name }}</h3>
                                 <div class="space-y-2 border-t border-slate-800/60 pt-3">
@@ -536,7 +533,7 @@
                         ratchetTier: item["固鎖Tier"] || item["固鎖 Tier"] || "A",
                         bit: item["軸心"] || "未知",
                         bitTier: item["軸心Tier"] || item["軸心 Tier"] || "A",
-                        type: item["類型"] || "攻擊"
+                        type: item["軸心類型"] || "攻擊"
                     }));
                 });
 
@@ -565,16 +562,24 @@
                 });
 
                 const uniqueBits = computed(() => {
-                    const map = {};
-                    processedBeyblades.value.forEach(item => {
-                        const name = item.bit;
-                        if (name && name !== "N/A" && name !== "") {
-                            if (!map[name]) map[name] = { name: name, count: 0, tier: item.bitTier };
-                            map[name].count++;
-                        }
-                    });
-                    return Object.values(map).sort((a, b) => b.count - a.count);
-                });
+    const map = {};
+    processedBeyblades.value.forEach(item => {
+        const name = item.bit;
+        // 過濾 N/A
+        if (name && name !== "N/A" && name !== "") {
+            if (!map[name]) {
+                map[name] = { 
+                    name: name, 
+                    count: 0, 
+                    tier: item.bitTier, 
+                    type: item.bitType // 改為使用軸心專屬類型
+                };
+            }
+            map[name].count++;
+        }
+    });
+    return Object.values(map).sort((a, b) => b.count - a.count);
+});
 
                 const filteredBeyblades = computed(() => {
                     return processedBeyblades.value.filter(bey => {
