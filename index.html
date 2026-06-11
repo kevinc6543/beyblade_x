@@ -26,49 +26,47 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    
     <style>
         body {
             font-family: 'Noto Sans TC', 'Orbitron', sans-serif;
             background-color: #0b0f19;
             color: #f8fafc;
         }
-        .neon-shadow-blue { box-shadow: 0 0 15px rgba(14, 165, 233, 0.3); }
-        .neon-shadow-purple { box-shadow: 0 0 15px rgba(168, 85, 247, 0.3); }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #0ea5e9; }
         [v-cloak] { display: none; }
+        .bit-image-bg {
+            background:
+                radial-gradient(circle at center, rgba(148, 163, 184, .26), transparent 58%),
+                linear-gradient(135deg, rgba(14, 165, 233, .12), rgba(168, 85, 247, .12));
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased">
-
     <div id="app" v-cloak class="flex-grow flex flex-col">
-        
-        <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 transition-all">
+        <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-gradient-to-r from-neonBlue to-neonPurple p-2 rounded-lg text-white animate-pulse">
+                    <div class="bg-gradient-to-r from-neonBlue to-neonPurple p-2 rounded-lg text-white">
                         <i class="fa-solid fa-yin-yang text-xl rotate-180"></i>
                     </div>
                     <div>
-                        <span class="font-black text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-neonBlue to-neonPurple font-['Orbitron']">
-                            BELLEBLADE X
-                        </span>
+                        <span class="font-black text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-neonBlue to-neonPurple font-['Orbitron']">BELLEBLADE X</span>
                         <span class="text-xs block text-slate-400 font-medium tracking-wide">爆旋陀螺X Pro</span>
                     </div>
                 </div>
 
                 <nav class="hidden md:flex space-x-1">
-                    <button 
-                        v-for="tab in tabs" 
+                    <button
+                        v-for="tab in tabs"
                         :key="tab.id"
                         @click="currentTab = tab.id"
                         :class="[
                             'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2',
-                            currentTab === tab.id 
-                                ? 'bg-slate-800 text-neonBlue border border-neonBlue/30' 
+                            currentTab === tab.id
+                                ? 'bg-slate-800 text-neonBlue border border-neonBlue/30'
                                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                         ]"
                     >
@@ -77,19 +75,17 @@
                     </button>
                 </nav>
 
-                <div class="flex items-center space-x-2">
-                    <span class="text-xs px-2.5 py-1 rounded-full flex items-center space-x-1.5 font-bold"
-                          :class="apiMode === 'live' ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800' : 'bg-amber-950/80 text-amber-400 border border-amber-800'">
-                        <span class="h-2 w-2 rounded-full animate-ping" :class="apiMode === 'live' ? 'bg-emerald-400' : 'bg-amber-400'"></span>
-                        <span>{{ apiMode === 'live' ? '已連線雲端' : '展示模式' }}</span>
-                    </span>
-                </div>
+                <span class="text-xs px-2.5 py-1 rounded-full flex items-center space-x-1.5 font-bold"
+                      :class="apiMode === 'live' ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800' : 'bg-amber-950/80 text-amber-400 border border-amber-800'">
+                    <span class="h-2 w-2 rounded-full" :class="apiMode === 'live' ? 'bg-emerald-400' : 'bg-amber-400'"></span>
+                    <span>{{ apiMode === 'live' ? '已連線雲端' : '展示模式' }}</span>
+                </span>
             </div>
         </header>
 
         <div class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-950 border-t border-slate-800 z-50 grid grid-cols-4 py-2">
-            <button 
-                v-for="tab in tabs" 
+            <button
+                v-for="tab in tabs"
                 :key="tab.id"
                 @click="currentTab = tab.id"
                 :class="[
@@ -103,7 +99,6 @@
         </div>
 
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full mb-16 md:mb-0">
-            
             <div v-if="loading" class="flex flex-col items-center justify-center py-24 space-y-4">
                 <div class="w-16 h-16 border-4 border-t-neonBlue border-slate-800 rounded-full animate-spin"></div>
                 <p class="text-slate-400 animate-pulse font-medium">正在與 Google Sheet 同步陀螺數據庫...</p>
@@ -112,107 +107,43 @@
             <div v-else-if="error" class="bg-red-950/50 border border-red-500/30 rounded-xl p-6 text-center max-w-lg mx-auto my-12">
                 <i class="fa-solid fa-triangle-exclamation text-red-400 text-4xl mb-3"></i>
                 <h3 class="text-lg font-bold text-red-200 mb-2">同步資料時發生錯誤</h3>
-                <p class="text-sm text-red-300 mb-4 whitespace-pre-line text-left leading-relaxed bg-slate-950/60 p-4 rounded-lg border border-red-900/30">
-                    {{ error }}
-                </p>
+                <p class="text-sm text-red-300 mb-4 whitespace-pre-line text-left leading-relaxed bg-slate-950/60 p-4 rounded-lg border border-red-900/30">{{ error }}</p>
                 <div class="flex flex-col sm:flex-row justify-center gap-3">
-                    <button @click="retryConnection" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm font-semibold transition-all">
-                        重試連線
-                    </button>
-                    <button @click="resetToMockData" class="px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition-all">
-                        使用離線模擬數據
-                    </button>
+                    <button @click="retryConnection" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm font-semibold transition-all">重試連線</button>
+                    <button @click="resetToMockData" class="px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition-all">使用離線模擬數據</button>
                 </div>
             </div>
 
             <div v-else>
-              <div v-if="currentTab === 'dashboard'" class="space-y-6">
-    <div class="bg-gradient-to-r from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-6 relative overflow-hidden">
-        <div class="absolute -right-10 -bottom-10 text-9xl text-slate-800/10 font-bold font-['Orbitron'] select-none">BEY</div>
-        <div class="relative z-10 space-y-2">
-            <h2 class="text-2xl font-extrabold text-white">歡迎回來，頂尖陀螺手！🎮</h2>
-            <p class="text-slate-400 text-sm max-w-2xl">
-                系統已成功解析 <span class="text-neonBlue font-bold">{{ rawBeyblades.length }} 隻原裝陀螺</span>。
-            </p>
-        </div>
-    </div>
+                <div v-if="currentTab === 'dashboard'" class="space-y-6">
+                    <div class="bg-gradient-to-r from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-6 relative overflow-hidden">
+                        <div class="absolute -right-10 -bottom-10 text-9xl text-slate-800/10 font-bold font-['Orbitron'] select-none">BEY</div>
+                        <div class="relative z-10 space-y-2">
+                            <h2 class="text-2xl font-extrabold text-white">歡迎回來，頂尖陀螺手！</h2>
+                            <p class="text-slate-400 text-sm max-w-2xl">系統已成功解析 <span class="text-neonBlue font-bold">{{ rawBeyblades.length }} 隻原裝陀螺</span>。</p>
+                        </div>
+                    </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-5 hover:border-neonBlue/30 transition-all group">
-            <div class="flex justify-between items-center mb-3">
-                <span class="text-xs font-bold text-slate-400 tracking-wider">陀螺總數</span>
-                <i class="fa-solid fa-yin-yang text-neonBlue text-lg"></i>
-            </div>
-            <div class="text-3xl font-black font-['Orbitron'] text-white">{{ rawBeyblades.length }}</div>
-        </div>
-        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-5 hover:border-neonPurple/30 transition-all">
-            <div class="flex justify-between items-center mb-3">
-                <span class="text-xs font-bold text-slate-400 tracking-wider">獨特上蓋</span>
-                <i class="fa-solid fa-shield-halved text-neonPurple text-lg"></i>
-            </div>
-            <div class="text-3xl font-black font-['Orbitron'] text-white">{{ uniqueBlades.length }}</div>
-        </div>
-        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-5 hover:border-neonGreen/30 transition-all">
-            <div class="flex justify-between items-center mb-3">
-                <span class="text-xs font-bold text-slate-400 tracking-wider">獨特固鎖</span>
-                <i class="fa-solid fa-ring text-neonGreen text-lg"></i>
-            </div>
-            <div class="text-3xl font-black font-['Orbitron'] text-white">{{ uniqueRatchets.length }}</div>
-        </div>
-        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-5 hover:border-neonOrange/30 transition-all">
-            <div class="flex justify-between items-center mb-3">
-                <span class="text-xs font-bold text-slate-400 tracking-wider">獨特軸心</span>
-                <i class="fa-solid fa-bolt-lightning text-neonOrange text-lg"></i>
-            </div>
-            <div class="text-3xl font-black font-['Orbitron'] text-white">{{ uniqueBits.length }}</div>
-        </div>
-    </div>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <stat-card label="陀螺總數" :value="rawBeyblades.length" icon="fa-solid fa-yin-yang" color="text-neonBlue"></stat-card>
+                        <stat-card label="獨特上蓋" :value="uniqueBlades.length" icon="fa-solid fa-shield-halved" color="text-neonPurple"></stat-card>
+                        <stat-card label="獨特固鎖" :value="uniqueRatchets.length" icon="fa-solid fa-ring" color="text-neonGreen"></stat-card>
+                        <stat-card label="獨特軸心" :value="uniqueBits.length" icon="fa-solid fa-bolt-lightning" color="text-neonOrange"></stat-card>
+                    </div>
 
-    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
-        <h3 class="text-sm font-bold text-slate-300 mb-4 flex items-center space-x-2">
-            <i class="fa-solid fa-chart-pie text-neonBlue"></i>
-            <span>擁有部件的戰力評級 (Tiers) 佔比</span>
-        </h3>
-        <div class="space-y-4">
-            <div>
-                <div class="flex justify-between text-xs mb-1">
-                    <span class="font-bold text-amber-400 flex items-center"><span class="h-2 w-2 rounded-full bg-amber-500 mr-1.5"></span>X 級部件 (超絕/頂級)</span>
-                    <span class="text-slate-400">{{ getTierPercent('X') }}%</span>
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+                        <h3 class="text-sm font-bold text-slate-300 mb-4 flex items-center space-x-2">
+                            <i class="fa-solid fa-chart-pie text-neonBlue"></i>
+                            <span>擁有部件的戰力評級 (Tiers) 佔比</span>
+                        </h3>
+                        <div class="space-y-4">
+                            <tier-bar tier="X" label="X 級部件 (超絕/頂級)" color="bg-amber-500" :percent="getTierPercent('X')"></tier-bar>
+                            <tier-bar tier="S" label="S 級部件 (神級)" color="bg-rose-500" :percent="getTierPercent('S')"></tier-bar>
+                            <tier-bar tier="A" label="A 級部件 (強力/泛用)" color="bg-purple-500" :percent="getTierPercent('A')"></tier-bar>
+                            <tier-bar tier="B" label="B 級部件 (戰術奇策)" color="bg-blue-500" :percent="getTierPercent('B')"></tier-bar>
+                        </div>
+                    </div>
                 </div>
-                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                    <div class="bg-amber-500 h-full rounded-full" :style="{ width: getTierPercent('X') + '%' }"></div>
-                </div>
-            </div>
-            <div>
-                <div class="flex justify-between text-xs mb-1">
-                    <span class="font-bold text-rose-400 flex items-center"><span class="h-2 w-2 rounded-full bg-rose-500 mr-1.5"></span>S 級部件 (神級)</span>
-                    <span class="text-slate-400">{{ getTierPercent('S') }}%</span>
-                </div>
-                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                    <div class="bg-rose-500 h-full rounded-full" :style="{ width: getTierPercent('S') + '%' }"></div>
-                </div>
-            </div>
-            <div>
-                <div class="flex justify-between text-xs mb-1">
-                    <span class="font-bold text-purple-400 flex items-center"><span class="h-2 w-2 rounded-full bg-purple-500 mr-1.5"></span>A 級部件 (強力/泛用)</span>
-                    <span class="text-slate-400">{{ getTierPercent('A') }}%</span>
-                </div>
-                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                    <div class="bg-purple-500 h-full rounded-full" :style="{ width: getTierPercent('A') + '%' }"></div>
-                </div>
-            </div>
-            <div>
-                <div class="flex justify-between text-xs mb-1">
-                    <span class="font-bold text-blue-400 flex items-center"><span class="h-2 w-2 rounded-full bg-blue-500 mr-1.5"></span>B 級部件 (戰術奇策)</span>
-                    <span class="text-slate-400">{{ getTierPercent('B') }}%</span>
-                </div>
-                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                    <div class="bg-blue-500 h-full rounded-full" :style="{ width: getTierPercent('B') + '%' }"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
                 <div v-if="currentTab === 'list'" class="space-y-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -220,50 +151,32 @@
                             <span class="h-4 w-1 bg-neonBlue rounded"></span>
                             <span>我的陀螺清單</span>
                         </h2>
-                        <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                            <div class="relative flex-grow sm:flex-grow-0 sm:w-64">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
-                                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                                </span>
-                                <input v-model="searchQuery" type="text" placeholder="搜尋陀螺/零件名稱..." class="w-full bg-slate-900 border border-slate-800 rounded-lg pl-9 pr-4 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-neonBlue transition-all">
-                            </div>
+                        <div class="relative flex-grow sm:flex-grow-0 sm:w-64 w-full">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                            </span>
+                            <input v-model="searchQuery" type="text" placeholder="搜尋陀螺/零件名稱..." class="w-full bg-slate-900 border border-slate-800 rounded-lg pl-9 pr-4 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-neonBlue transition-all">
                         </div>
                     </div>
 
                     <div v-if="filteredBeyblades.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div v-for="(bey, index) in filteredBeyblades" :key="index" class="bg-slate-900 border border-slate-800/80 rounded-xl p-5 hover:border-slate-700 transition-all flex flex-col justify-between">
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-[10px] px-2 py-0.5 rounded font-bold tracking-wider"
-                                          :class="{
-                                              'bg-sky-950/80 text-sky-400 border border-sky-800': bey.version === '港版',
-                                              'bg-emerald-950/80 text-emerald-400 border border-emerald-800': bey.version === '美版',
-                                              'bg-amber-950/80 text-amber-400 border border-amber-800': bey.version === '自購'
-                                          }">
-                                        {{ bey.version }}
-                                    </span>
-                                </div>
-                                <h3 class="text-base font-bold text-white mb-4 tracking-wide">{{ bey.name }}</h3>
-                                <div class="space-y-2 border-t border-slate-800/60 pt-3">
-                                    <div class="flex items-center text-xs justify-between">
-                                        <span class="font-semibold text-slate-500">上蓋 (Blade)：</span>
-                                        <span class="text-slate-300 font-medium">{{ bey.blade }}</span>
-                                    </div>
-                                    <div class="flex items-center text-xs justify-between">
-                                        <span class="font-semibold text-slate-500">固鎖 (Ratchet)：</span>
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-slate-300 font-medium">{{ bey.ratchet }}</span>
-                                            <span v-if="bey.ratchetTier" class="text-[9px] px-1.5 py-0.2 rounded font-black" :class="getTierClass(bey.ratchetTier)">Tier {{ bey.ratchetTier }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center text-xs justify-between">
-                                        <span class="font-semibold text-slate-500">軸心 (Bit)：</span>
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-slate-300 font-medium">{{ bey.bit }}</span>
-                                            <span v-if="bey.bitTier" class="text-[9px] px-1.5 py-0.2 rounded font-black" :class="getTierClass(bey.bitTier)">Tier {{ bey.bitTier }}</span>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div v-for="bey in filteredBeyblades" :key="bey.id" class="bg-slate-900 border border-slate-800/80 rounded-xl p-5 hover:border-slate-700 transition-all">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[10px] px-2 py-0.5 rounded font-bold tracking-wider"
+                                      :class="{
+                                          'bg-sky-950/80 text-sky-400 border border-sky-800': bey.version === '港版',
+                                          'bg-emerald-950/80 text-emerald-400 border border-emerald-800': bey.version === '美版',
+                                          'bg-amber-950/80 text-amber-400 border border-amber-800': bey.version === '自購',
+                                          'bg-slate-800 text-slate-300 border border-slate-700': !['港版','美版','自購'].includes(bey.version)
+                                      }">
+                                    {{ bey.version }}
+                                </span>
+                            </div>
+                            <h3 class="text-base font-bold text-white mb-4 tracking-wide">{{ bey.name }}</h3>
+                            <div class="space-y-2 border-t border-slate-800/60 pt-3">
+                                <part-row label="上蓋 (Blade)" :value="bey.blade"></part-row>
+                                <part-row label="固鎖 (Ratchet)" :value="bey.ratchet" :tier="bey.ratchetTier" :tier-class="getTierClass(bey.ratchetTier)"></part-row>
+                                <part-row label="軸心 (Bit)" :value="bey.bit" :tier="bey.bitTier" :tier-class="getTierClass(bey.bitTier)"></part-row>
                             </div>
                         </div>
                     </div>
@@ -276,55 +189,78 @@
                 <div v-if="currentTab === 'inventory'" class="space-y-6">
                     <h2 class="text-xl font-bold flex items-center space-x-2">
                         <span class="h-4 w-1 bg-neonPurple rounded"></span>
-                        <span>我的零件倉庫 </span>
+                        <span>我的零件倉庫</span>
                     </h2>
-                    <div class="flex border-b border-slate-800 space-x-4">
-                        <button @click="inventoryTab = 'blade'" :class="['pb-2 text-sm font-semibold transition-all', inventoryTab === 'blade' ? 'text-neonBlue border-b-2 border-neonBlue' : 'text-slate-400 hover:text-slate-200']">上蓋 ({{ uniqueBlades.length }})</button>
-                        <button @click="inventoryTab = 'ratchet'" :class="['pb-2 text-sm font-semibold transition-all', inventoryTab === 'ratchet' ? 'text-neonBlue border-b-2 border-neonBlue' : 'text-slate-400 hover:text-slate-200']">固鎖 ({{ uniqueRatchets.length }})</button>
-                        <button @click="inventoryTab = 'bit'" :class="['pb-2 text-sm font-semibold transition-all', inventoryTab === 'bit' ? 'text-neonBlue border-b-2 border-neonBlue' : 'text-slate-400 hover:text-slate-200']">軸心 ({{ uniqueBits.length }})</button>
+                    <div class="flex border-b border-slate-800 space-x-4 overflow-x-auto">
+                        <button @click="inventoryTab = 'blade'" :class="inventoryTabClass('blade')">上蓋 ({{ uniqueBlades.length }})</button>
+                        <button @click="inventoryTab = 'ratchet'" :class="inventoryTabClass('ratchet')">固鎖 ({{ uniqueRatchets.length }})</button>
+                        <button @click="inventoryTab = 'bit'" :class="inventoryTabClass('bit')">軸心 ({{ uniqueBits.length }})</button>
                     </div>
 
                     <div v-if="inventoryTab === 'blade'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    <div v-for="part in uniqueBlades" :key="part.name" class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 flex justify-between items-center">
-        <div>
-            <div class="text-[10px] text-neonBlue font-bold uppercase tracking-wider mb-0.5">
-                {{ part.source }}
-            </div>
-            <h3 class="text-sm font-bold text-white">{{ part.name }}</h3>
-            <p class="text-[11px] text-slate-500 mb-0 mt-1">庫存數量: {{ part.count }}</p>
-        </div>
-        <span class="text-xs px-2.5 py-1 bg-slate-800 rounded-lg text-slate-300 font-mono">x{{ part.count }}</span>
-    </div>
-</div>
-
-                    <div v-if="inventoryTab === 'ratchet'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div v-for="part in uniqueRatchets" :key="part.name" class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 flex justify-between items-center">
+                        <div v-for="part in uniqueBlades" :key="part.name" class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 flex justify-between items-center">
                             <div>
-                                <div class="flex items-center space-x-2">
-                                    <h3 class="text-sm font-bold text-white">{{ part.name }}</h3>
-                                    <span v-if="part.tier" class="text-[9px] px-1.5 py-0.2 rounded font-black" :class="getTierClass(part.tier)">Tier {{ part.tier }}</span>
-                                </div>
-                                <p class="text-[11px] text-slate-500 mb-0">出現 {{ part.count }} 次</p>
+                                <div class="text-[10px] text-neonBlue font-bold uppercase tracking-wider mb-0.5">{{ part.source }}</div>
+                                <h3 class="text-sm font-bold text-white">{{ part.name }}</h3>
+                                <p class="text-[11px] text-slate-500 mb-0 mt-1">庫存數量: {{ part.count }}</p>
                             </div>
-                            <span class="text-xs px-2.5 py-1 bg-slate-800 rounded-lg text-slate-300 font-mono">庫存 x{{ part.count }}</span>
+                            <span class="text-xs px-2.5 py-1 bg-slate-800 rounded-lg text-slate-300 font-mono">x{{ part.count }}</span>
                         </div>
                     </div>
 
-<div v-if="inventoryTab === 'bit'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    <div v-for="part in uniqueBits" :key="part.name" class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 flex justify-between items-center">
-        <div>
-            <div class="flex items-center space-x-2 mb-1">
-                <h3 class="text-sm font-bold text-white">{{ part.name }}</h3>
-                <span v-if="part.tier" class="text-[9px] px-1.5 py-0.2 rounded font-black" :class="getTierClass(part.tier)">Tier {{ part.tier }}</span>
-                <span class="text-[9px] px-1.5 py-0.2 rounded font-bold bg-slate-700 text-white border border-slate-600">
-                    {{ part.type || '未分類' }}
-                </span>
-            </div>
-            <p class="text-[11px] text-slate-500 mb-0">出現 {{ part.count }} 次</p>
-        </div>
-        <span class="text-xs px-2.5 py-1 bg-slate-800 rounded-lg text-slate-300 font-mono">庫存 x{{ part.count }}</span>
-    </div>
-</div>
+                    <div v-if="inventoryTab === 'ratchet'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div v-for="part in uniqueRatchets" :key="part.name" class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 flex gap-4 items-center">
+                            <div class="bit-image-bg w-24 h-24 rounded-lg border border-slate-700/70 flex items-center justify-center shrink-0 overflow-hidden">
+                                <img
+                                    v-if="part.imageUrl"
+                                    :src="part.imageUrl"
+                                    :alt="part.name"
+                                    class="w-20 h-20 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.20)]"
+                                    loading="lazy"
+                                    @error="part.imageUrl = ''"
+                                >
+                                <i v-else class="fa-solid fa-ring text-2xl text-slate-600"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                    <h3 class="text-sm font-bold text-white">{{ part.name }}</h3>
+                                    <span v-if="part.tier" class="text-[9px] px-1.5 py-0.2 rounded font-black" :class="getTierClass(part.tier)">Tier {{ part.tier }}</span>
+                                </div>
+                                <p class="text-[11px] text-slate-500">庫存 x{{ part.count }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="inventoryTab === 'bit'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div v-for="part in uniqueBits" :key="part.name" class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 flex gap-4 items-center">
+                            <div class="bit-image-bg w-24 h-24 rounded-lg border border-slate-700/70 flex items-center justify-center shrink-0 overflow-hidden">
+                                <img
+                                    v-if="part.imageUrl"
+                                    :src="part.imageUrl"
+                                    :alt="part.name"
+                                    class="w-20 h-20 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.20)]"
+                                    loading="lazy"
+                                    @error="part.imageUrl = ''"
+                                >
+                                <i v-else class="fa-solid fa-bolt-lightning text-2xl text-slate-600"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                    <h3 class="text-sm font-bold text-white">{{ part.name }}</h3>
+                                    <span v-if="part.code" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-mono">{{ part.code }}</span>
+                                    <span v-if="part.tier" class="text-[9px] px-1.5 py-0.2 rounded font-black" :class="getTierClass(part.tier)">Tier {{ part.tier }}</span>
+                                </div>
+                                <div class="flex flex-wrap gap-1 mb-2">
+                                    <span class="text-[9px] px-1.5 py-0.5 rounded font-bold bg-slate-700 text-white border border-slate-600">{{ part.type || '未分類' }}</span>
+                                    <span v-if="part.meta?.names?.eng" class="text-[9px] px-1.5 py-0.5 rounded font-bold bg-sky-950/70 text-sky-300 border border-sky-800">{{ part.meta.names.eng }}</span>
+                                </div>
+                                <p v-if="part.meta?.desc" class="text-[11px] text-slate-400 leading-relaxed line-clamp-2">{{ part.meta.desc }}</p>
+                                <p class="text-[11px] text-slate-500 mt-1">庫存 x{{ part.count }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div v-if="currentTab === 'settings'" class="space-y-6">
                     <h2 class="text-xl font-bold flex items-center space-x-2">
                         <span class="h-4 w-1 bg-slate-600 rounded"></span>
@@ -335,74 +271,146 @@
                         <div class="space-y-3">
                             <h3 class="text-sm font-bold text-white">資料來源模式</h3>
                             <div class="flex space-x-3">
-                                <button @click="toggleMode('mock')" :class="['flex-1 py-2.5 rounded-lg text-sm font-semibold border transition-all', apiMode === 'mock' ? 'bg-slate-800 text-neonBlue border-neonBlue/30' : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white']">離線模擬數據</button>
-                                <button @click="toggleMode('live')" :class="['flex-1 py-2.5 rounded-lg text-sm font-semibold border transition-all', apiMode === 'live' ? 'bg-slate-800 text-neonBlue border-neonBlue/30' : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white']">即時 Google Sheet 同步</button>
+                                <button @click="toggleMode('mock')" :class="modeButtonClass('mock')">離線模擬數據</button>
+                                <button @click="toggleMode('live')" :class="modeButtonClass('live')">即時 Google Sheet 同步</button>
                             </div>
                         </div>
 
                         <div v-if="apiMode === 'live'" class="space-y-3 pt-4 border-t border-slate-800/60">
                             <h3 class="text-sm font-bold text-white">Google Apps Script API URL</h3>
-                            <div class="space-y-2">
-                                <input v-model="gasUrlInput" type="text" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-neonBlue transition-all">
-                            </div>
+                            <input v-model="gasUrlInput" type="text" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-neonBlue transition-all">
                             <div class="flex justify-end pt-2">
                                 <button @click="connectAndSync" class="px-4 py-2 bg-gradient-to-r from-neonBlue to-neonPurple text-white text-xs font-bold rounded-lg hover:from-neonBlue/90 hover:to-neonPurple/90 transition-all flex items-center space-x-1">
                                     <i class="fa-solid fa-sync"></i><span>強制重新連線同步</span>
                                 </button>
                             </div>
                         </div>
+
+                        <div class="pt-4 border-t border-slate-800/60 text-xs text-slate-500 leading-relaxed">
+                            Bit 與 Ratchet 圖片目前直接引用 BeybladeHub 的公開圖片路徑，方便維護；如果你之後想完全避免外站變更影響，再改為搬回自己 repo host 就可以。
+                        </div>
                     </div>
                 </div>
-
             </div>
         </main>
 
         <footer class="bg-slate-950 border-t border-slate-800/50 py-6 text-center text-xs text-slate-600 mt-12">
             <div class="max-w-7xl mx-auto px-4">
-                <p class="font-semibold tracking-wider font-['Orbitron'] text-slate-500 mb-1">BEYBLADE X CONFIGURATOR v2.0</p>
+                <p class="font-semibold tracking-wider font-['Orbitron'] text-slate-500 mb-1">BEYBLADE X CONFIGURATOR v2.1</p>
                 <p>資料庫與庫存同步平台，專為極限陀螺玩家打造</p>
             </div>
         </footer>
-
     </div>
 
     <script>
         const { createApp, ref, computed, onMounted } = Vue;
 
-        createApp({
+        const bitMeta = {
+            A: { names: { eng: 'Accel' }, desc: '由平坦軸端加上大型 Gear 組成，提高 X Dash 性能。' },
+            B: { names: { eng: 'Ball' }, desc: '球狀軸端以適度移動來躱避攻擊及實現高持久力。' },
+            C: { names: { eng: 'Cyclone' }, desc: '渦形的平坦軸端在左迴轉時提高與對戰盤的緊咬度。' },
+            D: { names: { eng: 'Dot' }, desc: '在軸端的多數突起提高與對戰盤的摩擦。' },
+            E: { names: { eng: 'Elevate' }, desc: '附有大型 Guide 的設計容易保持姿勢。' },
+            F: { names: { eng: 'Flat' }, desc: '平坦軸端令陀螺跑動，提高以 X Dash 決勝的容易度。' },
+            GF: { names: { eng: 'Gear Flat' }, desc: '更容易勾住 X Line，實現更高速的 X Dash。' },
+            T: { names: { eng: 'Taper' }, desc: '收細的軸端兼具攻擊力及持久力。' },
+            S: { names: { eng: 'Spike' }, desc: '細小尖鋭的軸端持續穩守對戰盤中央。' },
+            BS: { names: { eng: 'Bound Spike' }, desc: '吸收着地的衝擊，軸端亦稍為增大。' }
+        };
+
+        const app = createApp({
+            components: {
+                'stat-card': {
+                    props: ['label', 'value', 'icon', 'color'],
+                    template: `
+                        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-5 hover:border-slate-700 transition-all">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-xs font-bold text-slate-400 tracking-wider">{{ label }}</span>
+                                <i :class="[icon, color, 'text-lg']"></i>
+                            </div>
+                            <div class="text-3xl font-black font-['Orbitron'] text-white">{{ value }}</div>
+                        </div>
+                    `
+                },
+                'tier-bar': {
+                    props: ['tier', 'label', 'color', 'percent'],
+                    template: `
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-bold text-slate-300 flex items-center"><span :class="[color, 'h-2 w-2 rounded-full mr-1.5']"></span>{{ label }}</span>
+                                <span class="text-slate-400">{{ percent }}%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div :class="[color, 'h-full rounded-full']" :style="{ width: percent + '%' }"></div>
+                            </div>
+                        </div>
+                    `
+                },
+                'part-row': {
+                    props: ['label', 'value', 'tier', 'tierClass'],
+                    template: `
+                        <div class="flex items-center text-xs justify-between gap-3">
+                            <span class="font-semibold text-slate-500">{{ label }}：</span>
+                            <div class="flex items-center space-x-2 min-w-0">
+                                <span class="text-slate-300 font-medium truncate">{{ value }}</span>
+                                <span v-if="tier" class="text-[9px] px-1.5 py-0.2 rounded font-black shrink-0" :class="tierClass">Tier {{ tier }}</span>
+                            </div>
+                        </div>
+                    `
+                }
+            },
             setup() {
-                // 選單定義 (移除 simulator)
                 const tabs = [
                     { id: 'dashboard', name: '首頁', icon: 'fa-solid fa-chart-line' },
                     { id: 'list', name: '我的陀螺', icon: 'fa-solid fa-yin-yang' },
                     { id: 'inventory', name: '零件倉庫', icon: 'fa-solid fa-boxes-stacked' },
                     { id: 'settings', name: '同步設定', icon: 'fa-solid fa-gears' }
                 ];
+
                 const currentTab = ref('dashboard');
                 const inventoryTab = ref('blade');
-
-                // 核心狀態
                 const rawBeyblades = ref([]);
                 const loading = ref(true);
                 const error = ref(null);
-
                 const defaultGasUrl = 'https://script.google.com/macros/s/AKfycbxUGu95U9pnU04OQvT5ckQl7C7CORz8NiCK25QxTCBsrLMC-A-Rwmj8cCv72vOtNb6Y/exec';
-                const apiMode = ref('live'); 
-                const gasUrlInput = ref(defaultGasUrl);
-                const savedGasUrl = ref(defaultGasUrl);
-
+                const apiMode = ref('live');
+                const gasUrlInput = ref(localStorage.getItem('belleblade.gasUrl') || defaultGasUrl);
                 const searchQuery = ref('');
 
-                // 離線備用 Mock Data
                 const mockBeyblades = [
-                    { "版本": "展示", "陀螺名稱": "BX-01 Dran Sword 3-60F", "上蓋": "Dran Sword", "固鎖": "3-60", "固鎖Tier": "S", "軸心": "F (Flat)", "軸心Tier": "A", "類型": "攻擊" },
-                    { "版本": "展示", "陀螺名稱": "BX-02 Hells Scythe 4-60T", "上蓋": "Hells Scythe", "固鎖": "4-60", "固鎖Tier": "A", "軸心": "T (Taper)", "軸心Tier": "S", "類型": "平衡" },
-                    { "版本": "展示", "陀螺名稱": "BX-23 Phoenix Wing 9-60GF", "上蓋": "Phoenix Wing", "固鎖": "9-60", "固鎖Tier": "S", "軸心": "GF (Gear Flat)", "軸心Tier": "S", "類型": "攻擊" }
+                    { '港/美版': '展示', '陀螺': 'BX-01 Dran Sword 3-60F', '上蓋': 'Dran Sword', '固鎖': '3-60', '固鎖 Tier': 'S', '軸心': 'F (Flat)', '軸心 Tier': 'A', '軸心類型': '攻擊', '類型': '攻擊' },
+                    { '港/美版': '展示', '陀螺': 'BX-02 Hells Scythe 4-60T', '上蓋': 'Hells Scythe', '固鎖': '4-60', '固鎖 Tier': 'A', '軸心': 'T (Taper)', '軸心 Tier': 'S', '軸心類型': '平衡', '類型': '平衡' },
+                    { '港/美版': '展示', '陀螺': 'BX-23 Phoenix Wing 9-60GF', '上蓋': 'Phoenix Wing', '固鎖': '9-60', '固鎖 Tier': 'S', '軸心': 'GF (Gear Flat)', '軸心 Tier': 'S', '軸心類型': '攻擊', '類型': '攻擊' }
                 ];
 
-                onMounted(() => {
-                    syncWithGAS(defaultGasUrl);
-                });
+                onMounted(() => syncWithGAS(gasUrlInput.value));
+
+                const getFirst = (item, keys, fallback = '') => {
+                    const value = keys.map(key => item[key]).find(val => val !== undefined && val !== null && String(val).trim() !== '');
+                    return value === undefined ? fallback : String(value).trim();
+                };
+
+                const bitImageCodeAliases = {
+                    OP: 'Op',
+                    TR: 'Tr',
+                    NR: 'Nr'
+                };
+
+                const getBitCode = (bitName) => {
+                    const firstToken = String(bitName || '').trim().split(/\s|\(/)[0];
+                    const normalizedCode = firstToken.replace(/[^A-Za-z0-9]/g, '');
+                    return bitImageCodeAliases[normalizedCode] || normalizedCode;
+                };
+
+                const getBitImageUrl = (bitName) => {
+                    const code = getBitCode(bitName);
+                    return code ? `https://beybladehub.app/bits/${encodeURIComponent(code)}.webp` : '';
+                };
+
+                const getRatchetImageUrl = (ratchetName) => {
+                    const code = String(ratchetName || '').trim();
+                    return code ? `https://beybladehub.app/ratchets/${encodeURIComponent(code)}.webp` : '';
+                };
 
                 const loadMockData = () => {
                     rawBeyblades.value = [...mockBeyblades];
@@ -416,9 +424,8 @@
                     loadMockData();
                 };
 
-                // Fetch + JSONP 雙重防禦機制
                 const syncWithGAS = async (url) => {
-                    if (!url) return;
+                    if (!url) return loadMockData();
                     loading.value = true;
                     error.value = null;
 
@@ -427,186 +434,103 @@
 
                     try {
                         const controller = new AbortController();
-                        const id = setTimeout(() => controller.abort(), 8000); 
-                        
-                        const response = await fetch(cleanUrl, {
-                            method: 'GET',
-                            redirect: 'follow',
-                            signal: controller.signal
-                        });
-                        
-                        clearTimeout(id);
+                        const timeoutId = setTimeout(() => controller.abort(), 8000);
+                        const response = await fetch(cleanUrl, { method: 'GET', redirect: 'follow', signal: controller.signal });
+                        clearTimeout(timeoutId);
 
                         if (!response.ok) throw new Error(`伺服器無回應 (HTTP ${response.status})`);
-                        
                         const data = await response.json();
                         if (data.error) throw new Error(data.error);
+                        if (!Array.isArray(data) || data.length === 0) throw new Error('同步成功，但 Google Sheet 中沒有找到陀螺資料。');
 
-                        if (Array.isArray(data) && data.length > 0) {
-                            rawBeyblades.value = data;
-                            apiMode.value = 'live';
-                        } else {
-                            throw new Error("同步成功，但 Google Sheet 中沒有找到陀螺資料。");
-                        }
+                        rawBeyblades.value = data;
+                        apiMode.value = 'live';
                     } catch (err) {
-                        console.warn("標準 Fetch 失敗，啟動 JSONP 備援...", err);
-                        try {
-                            const data = await fetchWithJsonp(cleanUrl);
-                            if (data.error) throw new Error(data.error);
-                            if (Array.isArray(data) && data.length > 0) {
-                                rawBeyblades.value = data;
-                                apiMode.value = 'live';
-                            } else {
-                                throw new Error("同步成功，但 Google Sheet 中沒有找到陀螺資料。");
-                            }
-                        } catch (jsonpErr) {
-                            error.value = `⚠️ 無法取得 Google Sheet 資料！\n\n系統訊息: ${jsonpErr.message}`;
-                            apiMode.value = 'mock';
-                        }
+                        error.value = `無法取得 Google Sheet 資料！\n\n系統訊息: ${err.message}`;
+                        apiMode.value = 'mock';
                     } finally {
                         loading.value = false;
                     }
                 };
 
-                const fetchWithJsonp = (url) => {
-                    return new Promise((resolve, reject) => {
-                        const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-                        const separator = url.indexOf('?') === -1 ? '?' : '&';
-                        const jsonpUrl = `${url}${separator}callback=${callbackName}`;
-                        const script = document.createElement('script');
-                        script.src = jsonpUrl;
-                        
-                        const timeoutId = setTimeout(() => {
-                            cleanup();
-                            reject(new Error("API 連線超時。"));
-                        }, 8000);
+                const processedBeyblades = computed(() => rawBeyblades.value.map((item, index) => {
+                    const productName = getFirst(item, ['陀螺', '陀螺名稱'], '');
+                    const blade = getFirst(item, ['上蓋'], '未知');
+                    const bit = getFirst(item, ['軸心'], '未知');
+                    const bitCode = getBitCode(bit);
 
-                        function cleanup() {
-                            clearTimeout(timeoutId);
-                            if (script.parentNode) script.parentNode.removeChild(script);
-                            delete window[callbackName];
-                        }
+                    return {
+                        id: `${productName}-${blade}-${index}`,
+                        version: getFirst(item, ['港/美版', '版本'], '港版'),
+                        name: productName && blade && !productName.includes(blade) ? `${productName}-${blade}` : productName || blade,
+                        source: productName || '未知來源',
+                        blade,
+                        ratchet: getFirst(item, ['固鎖'], '未知'),
+                        ratchetTier: getFirst(item, ['固鎖 Tier', '固鎖Tier'], 'A'),
+                        bit,
+                        bitCode,
+                        bitTier: getFirst(item, ['軸心 Tier', '軸心Tier'], 'A'),
+                        bitType: getFirst(item, ['軸心類型'], '無類型'),
+                        type: getFirst(item, ['類型'], '攻擊')
+                    };
+                }));
 
-                        window[callbackName] = function(data) {
-                            cleanup();
-                            resolve(data);
-                        };
-
-                        script.onerror = function() {
-                            cleanup();
-                            reject(new Error("瀏覽器請求失敗。"));
-                        };
-                        document.body.appendChild(script);
+                const uniqueBlades = computed(() => {
+                    const map = new Map();
+                    processedBeyblades.value.forEach(item => {
+                        if (!isValidPart(item.blade)) return;
+                        if (!map.has(item.blade)) map.set(item.blade, { name: item.blade, source: item.source, count: 0 });
+                        map.get(item.blade).count++;
                     });
-                };
-
-                const toggleMode = (mode) => {
-                    if (mode === 'mock') {
-                        resetToMockData();
-                    } else {
-                        apiMode.value = 'live';
-                        syncWithGAS(gasUrlInput.value);
-                    }
-                };
-
-                const connectAndSync = () => {
-                    if (!gasUrlInput.value.trim()) return;
-                    savedGasUrl.value = gasUrlInput.value.trim();
-                    syncWithGAS(gasUrlInput.value.trim());
-                };
-
-                const retryConnection = () => {
-                    syncWithGAS(gasUrlInput.value);
-                };
-
-            // 1. 資料預處理
-            const processedBeyblades = computed(() => {
-                    return rawBeyblades.value.map(item => {
-                        return {
-                            version: item["港/美版"] || "港版",
-                            name: `${item["陀螺"] || ""}-${item["上蓋"] || ""}`,
-                            blade: item["上蓋"] || "未知",
-                            ratchet: item["固鎖"] || "未知",
-                            ratchetTier: item["固鎖 Tier"] || "A",
-                            bit: item["軸心"] || "未知",
-                            bitTier: item["軸心 Tier"] || "A",
-                            bitType: item["軸心類型"] || "無類型",
-                            type: item["類型"] || "攻擊" // 補回這行，這是篩選器用的
-                        };
-                    });
+                    return [...map.values()].sort((a, b) => b.count - a.count);
                 });
 
-                // 2. 上蓋 (Blade) 去重
-const uniqueBlades = computed(() => {
-    const map = {};
-    processedBeyblades.value.forEach(item => {
-        const bladeName = item.blade;
-        // 【修正重點】不使用 split('-')，直接使用整個陀螺名稱作為來源
-        // 假設 rawBeyblades 裡的 "陀螺" 欄位本身就包含 "UX-17..."
-        // 我們直接把這個值傳進來顯示
-        const beyName = item.name.split('-')[0]; // 如果這導致切割，我們需要改用 raw 資料
-
-        // 如果你發現上面還是顯示錯誤，請將這行改成：
-        // const beyName = item.name.substring(0, item.name.lastIndexOf('-')); 
-        // 這樣會保留最後一個 hyphen 之前的所有文字
-        
-        if (bladeName && bladeName !== "N/A" && bladeName !== "未知" && bladeName !== "") {
-            if (!map[bladeName]) {
-                map[bladeName] = { 
-                    name: bladeName, 
-                    source: item.name.replace("-" + bladeName, ""), // 直接移除上蓋名稱，保留前面的陀螺全名
-                    count: 0, 
-                    tier: "N/A" 
-                };
-            }
-            map[bladeName].count++;
-        }
-    });
-    return Object.values(map).sort((a, b) => b.count - a.count);
-});
-
-                // 3. 固鎖 (Ratchet) 去重
                 const uniqueRatchets = computed(() => {
-                    const map = {};
+                    const map = new Map();
                     processedBeyblades.value.forEach(item => {
-                        const name = item.ratchet;
-                        if (name && name !== "N/A" && name !== "未知" && name !== "") {
-                            if (!map[name]) {
-                                map[name] = { name: name, count: 0, tier: item.ratchetTier };
-                            }
-                            map[name].count++;
+                        if (!isValidPart(item.ratchet)) return;
+                        if (!map.has(item.ratchet)) {
+                            map.set(item.ratchet, {
+                                name: item.ratchet,
+                                count: 0,
+                                tier: item.ratchetTier,
+                                imageUrl: getRatchetImageUrl(item.ratchet)
+                            });
                         }
+                        map.get(item.ratchet).count++;
                     });
-                    return Object.values(map).sort((a, b) => b.count - a.count);
+                    return [...map.values()].sort((a, b) => b.count - a.count);
                 });
 
-                // 4. 軸心 (Bit) 去重
                 const uniqueBits = computed(() => {
-                    const map = {};
+                    const map = new Map();
                     processedBeyblades.value.forEach(item => {
-                        const name = item.bit;
-                        if (name && name !== "N/A" && name !== "未知" && name !== "") {
-                            if (!map[name]) {
-                                map[name] = { name: name, count: 0, tier: item.bitTier, type: item.bitType };
-                            }
-                            map[name].count++;
+                        if (!isValidPart(item.bit)) return;
+                        if (!map.has(item.bit)) {
+                            map.set(item.bit, {
+                                name: item.bit,
+                                code: item.bitCode,
+                                count: 0,
+                                tier: item.bitTier,
+                                type: item.bitType,
+                                imageUrl: getBitImageUrl(item.bit),
+                                meta: bitMeta[item.bitCode]
+                            });
                         }
+                        map.get(item.bit).count++;
                     });
-                    return Object.values(map).sort((a, b) => b.count - a.count);
+                    return [...map.values()].sort((a, b) => b.count - a.count);
                 });
 
-   // 修改前：包含 matchType
-// 修改後：只保留搜尋關鍵字邏輯
-const filteredBeyblades = computed(() => {
-    return processedBeyblades.value.filter(bey => {
-        return Object.values(bey).some(val => 
-            String(val).toLowerCase().includes(searchQuery.value.toLowerCase())
-        );
-    });
-});
+                const filteredBeyblades = computed(() => {
+                    const keyword = searchQuery.value.toLowerCase();
+                    return processedBeyblades.value.filter(bey => Object.values(bey).some(val => String(val).toLowerCase().includes(keyword)));
+                });
+
+                const isValidPart = (value) => value && !['N/A', '未知', ''].includes(value);
 
                 const getTierClass = (tier) => {
-                    if (tier === 'X') return 'bg-amber-950/80 text-amber-300 border border-amber-500 font-bold animate-pulse';
+                    if (tier === 'X') return 'bg-amber-950/80 text-amber-300 border border-amber-500 font-bold';
                     if (tier === 'S') return 'bg-rose-950/80 text-rose-400 border border-rose-800 font-bold';
                     if (tier === 'A') return 'bg-purple-950/80 text-purple-400 border border-purple-800';
                     if (tier === 'B') return 'bg-blue-950/80 text-blue-400 border border-blue-800';
@@ -615,7 +539,8 @@ const filteredBeyblades = computed(() => {
 
                 const getTierPercent = (tierChar) => {
                     if (!processedBeyblades.value.length) return 0;
-                    let count = 0, total = 0;
+                    let count = 0;
+                    let total = 0;
                     processedBeyblades.value.forEach(item => {
                         total += 2;
                         if (item.ratchetTier === tierChar) count++;
@@ -624,13 +549,34 @@ const filteredBeyblades = computed(() => {
                     return Math.round((count / total) * 100);
                 };
 
+                const inventoryTabClass = (tab) => [
+                    'pb-2 text-sm font-semibold transition-all whitespace-nowrap',
+                    inventoryTab.value === tab ? 'text-neonBlue border-b-2 border-neonBlue' : 'text-slate-400 hover:text-slate-200'
+                ];
+
+                const modeButtonClass = (mode) => [
+                    'flex-1 py-2.5 rounded-lg text-sm font-semibold border transition-all',
+                    apiMode.value === mode ? 'bg-slate-800 text-neonBlue border-neonBlue/30' : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                ];
+
+                const toggleMode = (mode) => mode === 'mock' ? resetToMockData() : syncWithGAS(gasUrlInput.value);
+                const connectAndSync = () => {
+                    if (!gasUrlInput.value.trim()) return;
+                    localStorage.setItem('belleblade.gasUrl', gasUrlInput.value.trim());
+                    syncWithGAS(gasUrlInput.value.trim());
+                };
+                const retryConnection = () => syncWithGAS(gasUrlInput.value);
+
                 return {
                     tabs, currentTab, inventoryTab, rawBeyblades, processedBeyblades, uniqueBlades, uniqueRatchets, uniqueBits,
                     loading, error, apiMode, gasUrlInput, searchQuery, filteredBeyblades,
-                    getTierClass, getTierPercent, resetToMockData, toggleMode, connectAndSync, retryConnection
+                    getTierClass, getTierPercent, resetToMockData, toggleMode, connectAndSync, retryConnection,
+                    inventoryTabClass, modeButtonClass
                 };
             }
-        }).mount('#app');
+        });
+
+        app.mount('#app');
     </script>
 </body>
 </html>
