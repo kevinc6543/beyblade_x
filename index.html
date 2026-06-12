@@ -48,14 +48,16 @@
     <div id="app" v-cloak class="flex-grow flex flex-col">
         <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-gradient-to-r from-neonBlue to-neonPurple p-2 rounded-lg text-white">
-                        <i class="fa-solid fa-yin-yang text-xl rotate-180"></i>
-                    </div>
-                    <div>
-                        <span class="font-black text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-neonBlue to-neonPurple font-['Orbitron']">BELLEBLADE X</span>
-                        <span class="text-xs block text-slate-400 font-medium tracking-wide">爆旋陀螺X Pro</span>
-                    </div>
+               <div class="flex flex-col items-end">
+                    <span class="text-xs px-2.5 py-1 rounded-full flex items-center space-x-1.5 font-bold"
+                          :class="apiMode === 'live' ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800' : 'bg-amber-950/80 text-amber-400 border border-amber-800'">
+                        <span v-if="isBackgroundSyncing" class="fa-solid fa-rotate animate-spin"></span>
+                        <span v-else class="h-2 w-2 rounded-full" :class="apiMode === 'live' ? 'bg-emerald-400' : 'bg-amber-400'"></span>
+                        <span>{{ isBackgroundSyncing ? '同步中...' : (apiMode === 'live' ? '已連線雲端' : '展示模式') }}</span>
+                    </span>
+                    <span v-if="apiMode === 'live' && !isBackgroundSyncing" class="text-[9px] text-slate-500 mt-1 font-mono tracking-wider">
+                        上次更新: {{ lastSyncTime }}
+                    </span>
                 </div>
 
                 <nav class="hidden md:flex space-x-1">
@@ -372,6 +374,11 @@
                 const rawBeyblades = ref([]);
                 const loading = ref(true);
                 const error = ref(null);
+                // --- 緩存與同步狀態變數 ---
+                const CACHE_KEY = 'belleblade.rawBeyblades';
+                const LAST_SYNC_KEY = 'belleblade.lastSyncTime';
+                const lastSyncTime = ref(localStorage.getItem(LAST_SYNC_KEY) || '從未');
+                const isBackgroundSyncing = ref(false); // 控制背景靜默更新嘅 UI 顯示
                 const defaultGasUrl = 'https://script.google.com/macros/s/AKfycbxUGu95U9pnU04OQvT5ckQl7C7CORz8NiCK25QxTCBsrLMC-A-Rwmj8cCv72vOtNb6Y/exec';
                 const apiMode = ref('live');
                 const gasUrlInput = ref(localStorage.getItem('belleblade.gasUrl') || defaultGasUrl);
@@ -383,7 +390,21 @@
                     { '港/美版': '展示', '陀螺': 'BX-23 Phoenix Wing 9-60GF', '上蓋': 'Phoenix Wing', '固鎖': '9-60', '固鎖 Tier': 'S', '軸心': 'GF (Gear Flat)', '軸心 Tier': 'S', '軸心類型': '攻擊', '類型': '攻擊' }
                 ];
 
-                onMounted(() => syncWithGAS(gasUrlInput.value));
+                onMounted(() => {
+                    const cachedData = localStorage.getItem(CACHE_KEY);
+                    if (cachedData) {
+                        try {
+                            rawBeyblades.value = JSON.parse(cachedData);
+                            apiMode.value = 'live';
+                            loading.value = false; // 有緩存就立刻解除全屏 Loading
+                            isBackgroundSyncing.value = true; // 標記正在背景更新
+                        } catch (e) {
+                            console.error('解析緩存失敗', e);
+                        }
+                    }
+                    // 無論有無緩存，都觸發背景同步獲取最新資料
+                    syncWithGAS(gasUrlInput.value);
+                });
 
                 const getFirst = (item, keys, fallback = '') => {
                     const value = keys.map(key => item[key]).find(val => val !== undefined && val !== null && String(val).trim() !== '');
@@ -424,9 +445,15 @@
                     loadMockData();
                 };
 
-                const syncWithGAS = async (url) => {
+               const syncWithGAS = async (url) => {
                     if (!url) return loadMockData();
-                    loading.value = true;
+                    
+                    // 如果沒有舊數據，才顯示全屏 Loading
+                    if (rawBeyblades.value.length === 0) {
+                        loading.value = true;
+                    } else {
+                        isBackgroundSyncing.value = true;
+                    }
                     error.value = null;
 
                     let cleanUrl = url.trim();
@@ -443,13 +470,29 @@
                         if (data.error) throw new Error(data.error);
                         if (!Array.isArray(data) || data.length === 0) throw new Error('同步成功，但 Google Sheet 中沒有找到陀螺資料。');
 
+                        // 更新畫面數據
                         rawBeyblades.value = data;
                         apiMode.value = 'live';
+                        
+                        // 寫入緩存 (Cache)
+                        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+                        
+                        // 記錄最後更新時間
+                        const now = new Date().toLocaleTimeString('zh-HK', { hour12: false });
+                        localStorage.setItem(LAST_SYNC_KEY, now);
+                        lastSyncTime.value = now;
+
                     } catch (err) {
-                        error.value = `無法取得 Google Sheet 資料！\n\n系統訊息: ${err.message}`;
-                        apiMode.value = 'mock';
+                        // 如果背景更新失敗，但本身有 Cache，就不覆蓋畫面，只顯示 Console Error
+                        if (rawBeyblades.value.length === 0) {
+                            error.value = `無法取得 Google Sheet 資料！\n\n系統訊息: ${err.message}`;
+                            apiMode.value = 'mock';
+                        } else {
+                            console.warn("背景同步失敗，繼續使用緩存數據:", err.message);
+                        }
                     } finally {
                         loading.value = false;
+                        isBackgroundSyncing.value = false;
                     }
                 };
 
@@ -571,7 +614,7 @@
                     tabs, currentTab, inventoryTab, rawBeyblades, processedBeyblades, uniqueBlades, uniqueRatchets, uniqueBits,
                     loading, error, apiMode, gasUrlInput, searchQuery, filteredBeyblades,
                     getTierClass, getTierPercent, resetToMockData, toggleMode, connectAndSync, retryConnection,
-                    inventoryTabClass, modeButtonClass
+                    inventoryTabClass, modeButtonClass,isBackgroundSyncing, lastSyncTime
                 };
             }
         });
